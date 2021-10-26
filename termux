@@ -37,7 +37,7 @@ for dir in $TERMUX_SANDBOX_PATH/var/cache $TERMUX_SANDBOX_PATH/home; do
 done
 
 # Bind some common path
-for bind in /dev /proc /sys /system /vendor /apex /linkerconfig/ld.config.txt /property_context $TERMUX_SANDBOX_PATH:/data/data/com.termux/files/usr $TERMUX_SANDBOX_PATH/var/cache:/data/data/com.termux/cache; do
+for bind in /dev /proc /sys /system /vendor /apex /linkerconfig/ld.config.txt /property_context $TERMUX_SANDBOX_PATH:/data/data/com.termux/files/usr $TERMUX_SANDBOX_PATH/var/cache:/data/data/com.termux/cache $TERMUX_SANDBOX_PATH/home:/data/data/com.termux/files/home; do
 	[ -d $bind ] || [ -f $bind ] || echo $bind | grep com.termux > /dev/null && ARGS="$ARGS -b $bind"
 done
 
