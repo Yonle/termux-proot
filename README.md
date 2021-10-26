@@ -28,7 +28,9 @@ Uninstalling termux-proot is literally, very easy.
 
 ```sh
 rm -rf termux-proot.sh
-rm -rf $PREFIX/../../sandbox
+
+# The command below can use for reinstalling.
+proot -0 rm -rf $PREFIX/../../sandbox
 ```
 
 ## Community

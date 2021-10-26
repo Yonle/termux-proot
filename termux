@@ -14,7 +14,7 @@
 	echo -n "[## ] Extracting.... "
 	unzip -q ${TMPDIR:-/tmp}/.termux-rootfs.zip
 
-	[ $? != 0 ] && echo Fail && exit 6
+	[ $? != 0 ] && echo Fail && proot -0 rm -rf $TERMUX_SANDBOX_PATH && exit 6
 	echo Done
 
 	echo -n "[###] Symlinking.... "
