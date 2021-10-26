@@ -30,8 +30,8 @@
 ARGS=proot
 ARGS="$ARGS -r $TERMUX_SANDBOX_PATH"
 
-# Make sure that var/cache directory is there.
-# If it's not there, recreate directory
+# Make sure that some common directory like /home is there.
+# Otherwise, we recreate the directory
 for dir in $TERMUX_SANDBOX_PATH/var/cache $TERMUX_SANDBOX_PATH/home; do
 	! [ -d $dir ] && mkdir $dir
 done
