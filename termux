@@ -42,5 +42,8 @@ ARGS="$ARGS -w /data/data/com.termux/files/home"
 
 cmd="$@"
 
+# Unset Preload Library.
+unset LD_PRELOAD
+
 [ -z "$cmd" ] && exec $ARGS /bin/login
 ! [ -z "$cmd" ] && exec $ARGS /bin/login -c "$cmd"
