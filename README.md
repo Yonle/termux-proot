@@ -13,6 +13,8 @@ Before installing, We need these 3 packages to be installed in your Termux:
 
 You may do `pkg install [package]` to install those required packages.
 
+And finally, set up sandboxed environment:
+
 ```sh
 curl -sLO git.io/termux-proot.sh
 chmod +x termux-proot.sh
