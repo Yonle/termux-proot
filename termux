@@ -7,15 +7,14 @@
 
 # { Installation }
 [ $(uname -o) != "Android" ] && exec echo "Sorry. This script is only executeable on Android. Use Termux to exexute this or use termux-docker."
-! [ -d $TERMUX_SANDBOX_PATH ] && {
+! [ -d $TERMUX_SANDBOX_PATH ] || [ -z "$(ls -A $TERMUX_SANDBOX_PATH)" ] && {
 	! [ -f ${TMPDIR:-/tmp}/.termux-rootfs.zip ] && echo "[#  ] Downloading Latest Termux Bootstrap...." && curl -#Lo ${TMPDIR:-/tmp}/.termux-rootfs.zip https://github.com/termux/termux-packages/releases/download/$(curl -s "https://api.github.com/repos/termux/termux-packages/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')/bootstrap-$(dpkg --print-architecture).zip
-	[ $? != 0 ] && exit 6
 	mkdir $TERMUX_SANDBOX_PATH && cd $TERMUX_SANDBOX_PATH
 
 	echo -n "[## ] Extracting.... "
 	unzip -q ${TMPDIR:-/tmp}/.termux-rootfs.zip
 
-	[ $? != 0 ] && exit 6
+	[ $? != 0 ] && echo Fail && exit 6
 	echo Done
 
 	echo -n "[###] Symlinking.... "
@@ -23,8 +22,6 @@
 		ln -s ${p/←/ }
 	done <SYMLINKS.txt && rm SYMLINKS.txt
 	echo Done
-
-	echo -e "\n\nIn first startup, You may face a warning like this:\n\n  proot warning: can't chdir("/data/data/com.termux/files/home/.") in the guest rootfs: No such file or directory\n\nJust ignore the warning. It will gone after the next launch.\n\n"
 }
 
 ARGS=proot
