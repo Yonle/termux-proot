@@ -6,6 +6,13 @@ A sandboxed, 2nd termux, isolated or jailed termux environment with proot
 Test something out in sandboxed environment with 0% Afraid of getting bricked in your real termux. Human is curious, Ain't we?
 
 ## Setup & Installation
+Before installing, We need these 3 packages to be installed in your Termux:
+ * `curl` for fetching & downloading latest termux bootstrap.
+ * `unzip` for unzipping Termux Bootstrap.
+ * `proot` for start sandboxing environment.
+
+You may do `pkg install [package]` to install those required packages.
+
 ```sh
 curl -sLO git.io/termux-proot.sh
 chmod +x termux-proot.sh
