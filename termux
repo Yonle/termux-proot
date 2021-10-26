@@ -4,8 +4,8 @@
 # https://git.io/termux-proot
 
 [ -z $TERMUX_SANDBOX_PATH ] && export TERMUX_SANDBOX_PATH=$PREFIX/../../sandbox
-! [ $proot=$(command -v proot) ] && pkg install proot -yq
-! [ $curl=$(command -v curl) ] && pkg install curl -yq
+! [ proot=$(command -v proot) ] && pkg install proot -yq
+! [ curl=$(command -v curl) ] && pkg install curl -yq
 
 # { Installation }
 [ $(uname -o) != "Android" ] && exec echo "Sorry. This script is only executeable on Android. Use Termux to exexute this or use termux-docker."
