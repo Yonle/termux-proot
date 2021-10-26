@@ -9,7 +9,7 @@ Test something out in sandboxed environment with 0% Afraid of getting bricked in
 Before installing, We need these 3 packages to be installed in your Termux:
  * `curl` for fetching & downloading latest termux bootstrap.
  * `unzip` for unzipping Termux Bootstrap.
- * `proot` for start sandboxing environment.
+ * `proot` for start sandboxed environment.
 
 You may do `pkg install [package]` to install those required packages.
 
@@ -17,7 +17,7 @@ You may do `pkg install [package]` to install those required packages.
 curl -sLO git.io/termux-proot.sh
 chmod +x termux-proot.sh
 
-# Will setup by itself & start sandboxing environment
+# Will setup by itself & start sandboxed environment
 ./termux-proot.sh
 ```
 
