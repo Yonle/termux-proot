@@ -4,13 +4,17 @@
 # https://git.io/termux-proot
 
 [ -z $TERMUX_SANDBOX_PATH ] && export TERMUX_SANDBOX_PATH=$PREFIX/../../sandbox
-! proot=$(command -v proot) && pkg install proot -yq
-! curl=$(command -v curl) && pkg install curl -yq
+for i in proot curl unzip; do
+	! packages=$(command -v $i) && pkg install -yq $i
+	[ $? != 1 ] && exec echo -e "Something went wrong. Please execute this command manually:\n  pkg install -y $i"
+done
 
 # { Installation }
 [ $(uname -o) != "Android" ] && exec echo "Sorry. This script is only executeable on Android. Use Termux to exexute this or use termux-docker."
-! [ -d $TERMUX_SANDBOX_PATH ] && mkdir $TERMUX_SANDBOX_PATH && cd $TERMUX_SANDBOX_PATH && {
+! [ -d $TERMUX_SANDBOX_PATH ] && {
 	! [ -f ${TMPDIR:-/tmp}/.termux-rootfs.zip ] && echo "[#  ] Downloading Latest Termux Bootstrap...." && curl -#Lo ${TMPDIR:-/tmp}/.termux-rootfs.zip https://github.com/termux/termux-packages/releases/download/$(curl -s "https://api.github.com/repos/termux/termux-packages/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')/bootstrap-$(dpkg --print-architecture).zip
+	[ $? != 0 ] && exit 6
+	mkdir $TERMUX_SANDBOX_PATH && cd $TERMUX_SANDBOX_PATH
 
 	echo -n "[## ] Extracting.... "
 	unzip -q ${TMPDIR:-/tmp}/.termux-rootfs.zip
