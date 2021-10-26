@@ -4,10 +4,6 @@
 # https://git.io/termux-proot
 
 [ -z $TERMUX_SANDBOX_PATH ] && export TERMUX_SANDBOX_PATH=$PREFIX/../../sandbox
-for i in proot curl unzip; do
-	! packages=$(command -v $i) && pkg install -yq $i
-	[ $? != 1 ] || [ $? != 0 ] && exec echo -e "Something went wrong. Please execute this command manually:\n  pkg install -y $i"
-done
 
 # { Installation }
 [ $(uname -o) != "Android" ] && exec echo "Sorry. This script is only executeable on Android. Use Termux to exexute this or use termux-docker."
