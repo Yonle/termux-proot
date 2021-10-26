@@ -3,7 +3,8 @@
 # termux-proot - A sandboxed, 2nd termux, isolated or jailed termux environment with proot
 # https://git.io/termux-proot
 
-[ -z $TERMUX_SANDBOX_PATH ] && export TERMUX_SANDBOX_PATH=$PREFIX/../../sandbox
+[ -z $TERMUX_SANDBOX_PATH ] && export TERMUX_SANDBOX_PATH=$PREFIX/../../sandbox 
+[ -z $TERMUX_SANDBOX_PREFIX ] && export TERMUX_SANDBOX_PREFIX=/data/data/com.termux/files
 
 # { Installation }
 [ $(uname -o) != "Android" ] && exec echo "Sorry. This script is only executeable on Android. Use Termux to exexute this or use termux-docker."
@@ -34,11 +35,25 @@ for dir in $TERMUX_SANDBOX_PATH/var/cache $TERMUX_SANDBOX_PATH/home; do
 done
 
 # Bind some common path
-for bind in /dev /proc /sys /system /vendor /apex /linkerconfig/ld.config.txt /property_context $TERMUX_SANDBOX_PATH:/data/data/com.termux/files/usr $TERMUX_SANDBOX_PATH/var/cache:/data/data/com.termux/cache $TERMUX_SANDBOX_PATH/home:/data/data/com.termux/files/home; do
+for bind in /dev /proc /sys /system /vendor /apex /linkerconfig/ld.config.txt /property_context $TERMUX_SANDBOX_PATH:$TERMUX_SANDBOX_PREFIX/usr $TERMUX_SANDBOX_PATH/var/cache:/data/data/com.termux/cache $TERMUX_SANDBOX_PATH/home:$TERMUX_SANDBOX_PREFIX/home; do
 	[ -d $bind ] || [ -f $bind ] || echo $bind | grep com.termux > /dev/null && ARGS="$ARGS -b $bind"
 done
 
-ARGS="$ARGS -w /data/data/com.termux/files/home"
+ARGS="$ARGS -w $TERMUX_SANDBOX_PREFIX/home"
+ARGS="$ARGS $TERMUX_SANDBOX_PREFIX/usr/bin/env -i"
+ARGS="$ARGS HOME=$TERMUX_SANDBOX_PREFIX/home"
+ARGS="$ARGS PATH=$TERMUX_SANDBOX_PREFIX/usr/bin"
+ARGS="$ARGS TERM=${TERM:-xterm-256color}"
+ARGS="$ARGS ANDROID_DATA=/data"
+ARGS="$ARGS ANDROID_ROOT=/system"
+ARGS="$ARGS EXTERNAL_STORAGE=/sdcard"
+ARGS="$ARGS LANG=${LANG:-en_US.UTF-8}"
+ARGS="$ARGS LD_LIBRARY_PATH=$TERMUX_SANDBOX_PREFIX/usr/lib"
+[ -x $TERMUX_SANDBOX_PREFIX/usr/lib/libtermux-exec.so ] && ARGS="$ARGS LD_PRELOAD=$TERMUX_SANDBOX_PREFIX/usr/lib/libtermux-exec.so"
+ARGS="$ARGS TERMUX_VERSION=${TERMUX_VERSION:-0.118}"
+ARGS="$ARGS PREFIX=$TERMUX_SANDBOX_PREFIX/usr"
+ARGS="$ARGS TMPDIR=$TERMUX_SANDBOX_PREFIX/usr/tmp"
+ARGS="$ARGS $TERMUX_SANDBOX_ENV"
 
 cmd="$@"
 
