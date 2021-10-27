@@ -37,8 +37,9 @@ proot -0 rm -rf $PREFIX/../../sandbox
 termux-proot also has it's own environment variables and it's changeable. They are:
 
  * `TERMUX_SANDBOX_PATH` - Path to where Termux sandbox folder located. Default is `$PREFIX/../../sandbox`
- * `TERMUX_SANDBOX_APPPATH` - A fake path that used for having support of some various ported termux program. Default is `/data/data/com.termux/files`
+ * `TERMUX_SANDBOX_APPPATH` - A variable that used to simulate Termux app path. Default is `/data/data/com.termux/files`
  * `TERMUX_SANDBOX_ENV` - A variable that used to reveal a environment variable to guest. Can used like `TERMUX_SANDBOX_ENV="FOO=BAR BAR=FOO" ./termux-proot.sh`
+ * `TERMUX_SANDBOX_PROOT_OPTIONS` - A variable that used to add some proot arguments. Can used like `TERMUX_SANDBOX_PROOT_OPTIONS="-b /sdcard" ./termux-proot.sh`
 
 ## Community
 - [Telegram group](https://t.me/yonlecoder)

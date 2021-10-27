@@ -26,7 +26,7 @@
 }
 
 ARGS=proot
-ARGS="$ARGS --kill-on-exit -r $TERMUX_SANDBOX_PATH"
+ARGS="$ARGS --kill-on-exit -r $TERMUX_SANDBOX_PATH $TERMUX_SANDBOX_PROOT_OPTIONS"
 
 # Make sure that some common directory like /home is there.
 # Otherwise, we recreate the directory
