@@ -48,6 +48,7 @@ fi
 
 ARGS=("proot")
 ARGS+=("--kill-on-exit -r $TERMUX_SANDBOX_PATH $TERMUX_SANDBOX_PROOT_OPTIONS")
+ARGS+=("-w $TERMUX_SANDBOX_APPPATH/files/home")
 
 # Make sure that some common directory like /home is there.
 # Otherwise, we recreate the directory
@@ -57,25 +58,26 @@ done
 
 # Bind some common path
 for bind in /dev /proc /sys /system /vendor /apex /linkerconfig/ld.config.txt /property_context $TERMUX_SANDBOX_PATH:$TERMUX_SANDBOX_APPPATH/files/usr $TERMUX_SANDBOX_PATH/var/cache:$TERMUX_SANDBOX_APPPATH/cache $TERMUX_SANDBOX_PATH/home:$TERMUX_SANDBOX_APPPATH/files/home; do
-	[ -d "$bind" ] || [ -f "$bind" ] || grep -q com.termux <<< "$bind" && ARGS+=("-b $bind")
+	[ -d "$bind" ] || [ -f "$bind" ] || grep -q $TERMUX_SANDBOX_APPPATH <<< "$bind" && ARGS+=("-b $bind")
 done
 
-ARGS+=("-w $TERMUX_SANDBOX_APPPATH/files/home")
-ARGS+=("$TERMUX_SANDBOX_APPPATH/files/usr/bin/env -i")
-ARGS+=("HOME=$TERMUX_SANDBOX_APPPATH/files/home")
-ARGS+=("PATH=$TERMUX_SANDBOX_APPPATH/files/usr/bin")
-ARGS+=("TERM=${TERM:-xterm-256color}")
-ARGS+=("COLORTERM=${COLORTERM:-truecolor}")
-ARGS+=("ANDROID_DATA=/data")
-ARGS+=("ANDROID_ROOT=/system")
-ARGS+=("EXTERNAL_STORAGE=/sdcard")
-ARGS+=("LANG=${LANG:-en_US.UTF-8}")
-ARGS+=("LD_LIBRARY_PATH=$TERMUX_SANDBOX_APPPATH/files/usr/lib")
-[ -x "$TERMUX_SANDBOX_APPPATH/files"/usr/lib/libtermux-exec.so ] && ARGS+=("LD_PRELOAD=$TERMUX_SANDBOX_APPPATH/files/usr/lib/libtermux-exec.so")
-ARGS+=("TERMUX_VERSION=${TERMUX_VERSION:-0.118}")
-ARGS+=("PREFIX=$TERMUX_SANDBOX_APPPATH/files/usr")
-ARGS+=("TMPDIR=$TERMUX_SANDBOX_APPPATH/files/usr/tmp")
-ARGS+=("$TERMUX_SANDBOX_ENV")
+if [ -x $TERMUX_SANDBOX_APPPATH/bin/env ]; then
+	ARGS+=("$TERMUX_SANDBOX_APPPATH/files/usr/bin/env -i")
+	ARGS+=("HOME=$TERMUX_SANDBOX_APPPATH/files/home")
+	ARGS+=("PATH=$TERMUX_SANDBOX_APPPATH/files/usr/bin")
+	ARGS+=("TERM=${TERM:-xterm-256color}")
+	ARGS+=("COLORTERM=${COLORTERM:-truecolor}")
+	ARGS+=("ANDROID_DATA=/data")
+	ARGS+=("ANDROID_ROOT=/system")
+	ARGS+=("EXTERNAL_STORAGE=/sdcard")
+	ARGS+=("LANG=${LANG:-en_US.UTF-8}")
+	ARGS+=("LD_LIBRARY_PATH=$TERMUX_SANDBOX_APPPATH/files/usr/lib")
+	[ -x "$TERMUX_SANDBOX_APPPATH/files"/usr/lib/libtermux-exec.so ] && ARGS+=("LD_PRELOAD=$TERMUX_SANDBOX_APPPATH/files/usr/lib/libtermux-exec.so")
+	ARGS+=("TERMUX_VERSION=${TERMUX_VERSION:-0.118}")
+	ARGS+=("PREFIX=$TERMUX_SANDBOX_APPPATH/files/usr")
+	ARGS+=("TMPDIR=$TERMUX_SANDBOX_APPPATH/files/usr/tmp")
+	ARGS+=("$TERMUX_SANDBOX_ENV")
+fi
 
 cmd="$*"
 
