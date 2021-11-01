@@ -11,7 +11,7 @@ Before installing, We need these 3 packages to be installed in your Termux:
  * `unzip` for unzipping Termux Bootstrap.
  * `proot` for start sandboxed environment.
 
-You may do `pkg install [package]` to install those required packages.
+These required packages will be installed if you don't have them.
 
 And finally, set up sandboxed environment:
 
@@ -27,13 +27,13 @@ chmod +x termux-proot.sh
 Uninstalling termux-proot is literally, very easy. 
 
 ```sh
-rm -rf termux-proot.sh
+rm termux-proot.sh
 
 # The command below can use for reinstalling.
 proot -0 rm -rf $PREFIX/../../sandbox
 ```
 
-## Environmenr Variables
+## Environment Variables
 termux-proot also has it's own environment variables and it's changeable. They are:
 
  * `TERMUX_SANDBOX_PATH` - Path to where Termux sandbox folder located. Default is `$PREFIX/../../sandbox`
