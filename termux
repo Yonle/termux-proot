@@ -41,7 +41,7 @@ if [ -f "$TERMUX_SANDBOX_PATH/SYMLINKS.txt" ]; then
 	echo -n "[###] Symlinking.... "
 	while read -r p; do
 		IFS="←" read -r FILE DEST <<< "$p"
-		ln -s "$FILE" "$DEST"
+		proot -0 ln -s "$FILE" "$DEST"
 	done < SYMLINKS.txt && rm SYMLINKS.txt
 	echo "Done"
 fi
