@@ -53,7 +53,7 @@ ARGS+=("-w $TERMUX_SANDBOX_APPPATH/files/home")
 # Make sure that some common directory like /home is there.
 # Otherwise, we recreate the directory
 for dir in $TERMUX_SANDBOX_PATH/var/cache $TERMUX_SANDBOX_PATH/home $TERMUX_SANDBOX_PATH/sdcard; do
-	! [ -d "$dir" ] && mkdir "$dir"
+	! [ -d "$dir" ] && mkdir -p "$dir"
 done
 
 # Bind some common path
