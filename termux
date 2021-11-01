@@ -34,7 +34,10 @@ if [ ! -d "$TERMUX_SANDBOX_PATH" ] || [ -z "$(ls -A "$TERMUX_SANDBOX_PATH")" ]; 
 		exit 6
 	fi
 	echo "Done"
+fi
 
+if [ -f "$TERMUX_SANDBOX_PATH/SYMLINKS.txt" ]; then
+	cd $TERMUX_SANDBOX_PATH
 	echo -n "[###] Symlinking.... "
 	while read -r p; do
 		IFS="←" read -r FILE DEST <<< "$p"
