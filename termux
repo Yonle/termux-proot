@@ -7,8 +7,7 @@
 DEPS=("curl" "unzip" "proot")
 for DEP in "${DEPS[@]}"; do
 	if ! hash "$DEP" 2>/dev/null; then
-		echo "$DEP not found, installing..."
-		apt install "$DEP" -y
+		pkg install "$DEP" -y
 	fi
 done
 
