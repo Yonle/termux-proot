@@ -29,11 +29,11 @@ if [ ! -d "$TERMUX_ANDROID_BASE" ]; then
 		*)  exec echo "Unsupported Architecture: $(uname -m)" ;;
 	esac
 	if [ ! -f "${TMPDIR:-/tmp}"/.android-base.tar.gz ]; then
-		echo "[1/5] Downloading Android base system...."
+		echo "[1/6] Downloading Android base system...."
 		curl -Lo "${TMPDIR:-/tmp}"/.android-base.tar.gz https://github.com/Yonle/termux-proot/archive/refs/tags/system-$ARCH.tar.gz
 	fi
 	mkdir -p "$TERMUX_ANDROID_BASE" && cd "$TERMUX_ANDROID_BASE" || exit 1
-	echo -n "[2/5] Extracting Android base system.... "
+	echo -n "[2/6] Extracting Android base system.... "
 	if ! tar -xzf "${TMPDIR:-/tmp}"/.android-base.tar.gz ; then
 		echo "Failed to extract Base system"
 		rm -rf "${TMPDIR:-/tmp}"/.android-base.tar.gz
@@ -46,12 +46,12 @@ fi
 
 if [ ! -d "$TERMUX_SANDBOX_PATH" ] || [ -z "$(ls -A "$TERMUX_SANDBOX_PATH")" ]; then
 	if [ ! -f "${TMPDIR:-/tmp}"/.termux-rootfs.zip ]; then
-		echo "[3/5] Downloading Latest Termux Bootstrap...."
+		echo "[3/6] Downloading Latest Termux Bootstrap...."
 		curl -Lo "${TMPDIR:-/tmp}"/.termux-rootfs.zip https://github.com/termux/termux-packages/releases/download/"$(curl -s "https://api.github.com/repos/termux/termux-packages/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')"/bootstrap-"$(uname -m)".zip
 	fi
 	mkdir "$TERMUX_SANDBOX_PATH" && cd "$TERMUX_SANDBOX_PATH" || exit 1
 
-	echo -n "[4/5] Extracting.... "
+	echo -n "[4/6] Extracting.... "
 	if ! unzip -q "${TMPDIR:-/tmp}"/.termux-rootfs.zip; then
 		echo "Failed extracting bootstrap!"
 		proot -0 rm -rf "$TERMUX_SANDBOX_PATH"
@@ -62,7 +62,7 @@ fi
 
 if [ -f "$TERMUX_SANDBOX_PATH/SYMLINKS.txt" ]; then
 	cd $TERMUX_SANDBOX_PATH
-	echo -n "[5/5] Symlinking.... "
+	echo -n "[5/6] Symlinking.... "
 	while read -r p; do
 		IFS="←" read -r FILE DEST <<< "$p"
 		proot -0 ln -s "$FILE" "$DEST"
@@ -106,6 +106,7 @@ cmd="$*"
 # Unset Preload Library.
 unset LD_PRELOAD
 
+echo "[6/6] Updating Static hosts...."
 ${ARGS[@]} /system/bin/update-static-dns
 # shellcheck disable=SC2068
 case "$cmd" in
