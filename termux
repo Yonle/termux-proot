@@ -7,7 +7,7 @@
 DEPS=("curl" "unzip" "proot")
 for DEP in "${DEPS[@]}"; do
 	if ! hash "$DEP" 2>/dev/null; then
-		echo "$DEP is not installed. Aborting."
+		echo "$DEP is not installed. Aborting." && exit 6
 	fi
 done
 
