@@ -18,7 +18,14 @@ done
 [ "$(id -u)" = "0" ] && exec echo -e "You shouldn't execute this script as root, don't you?\nSo you're trying to harm your own Device.\n\nAbility to use termux-proot with root (even fake) is disabled permanently.\nJust do it in your real termux, Or use chroot. But don't blame me for broken device OK?"
 
 # { Installation }
-[ "$(uname -o)" != "Android" ] && exec echo "Sorry. This script is only executable on Android. Use Termux to exexute this or use termux-docker."
+if [ "$(uname -o)" != "Android" ]; then
+	echo "Using nightly build for non-android support."
+	echo "The nightly script will stored at ${HOME:-/home}/termux-proot.sh."
+	echo -e "\nKeep in mind that this feature is still alpha. Most of function may still not work properly.\nSo please report it at:\n  https://github.com/Yonle/termux-proot/issues"
+	curl -sLo ${HOME:-/home}/termux-proot.sh https://raw.githubusercontent.com/Yonle/termux-proot/nightly/termux || exit 1
+	chmod +x ${HOME:-/home}/termux-proot.sh
+	exec ${HOME:-/home}/termux-proot.sh "$@"
+fi
 
 if [ ! -d "$TERMUX_SANDBOX_PATH" ] || [ -z "$(ls -A "$TERMUX_SANDBOX_PATH")" ]; then
 	if [ ! -f "${TMPDIR:-/tmp}"/.termux-rootfs.zip ]; then
