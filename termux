@@ -28,16 +28,16 @@ if [ ! -d "$TERMUX_ANDROID_BASE" ] || [ -z "$(ls -A $TERMUX_ANDROID_BASE)" ]; th
 		arm|aarch64|armv7l|armv8l)  ARCH=arm ;;
 		*)  exec echo "Unsupported Architecture: $(uname -m)" ;;
 	esac
-	if [ ! -f "${TMPDIR:-/tmp}"/.android-base.tar.gz ]; then
-		echo "[1/6] Downloading Android base system...."
-		curl -Lo "${TMPDIR:-/tmp}"/.android-base.tar.gz https://github.com/Yonle/termux-proot/archive/refs/tags/system-$ARCH.tar.gz
+	if [ ! -f "${TMPDIR:-/tmp}"/.android-base.zip ]; then
+		echo "[1/6] Downloading Android base system...." 
+		curl -Lo "${TMPDIR:-/tmp}"/.android-base.zip https://github.com/Yonle/termux-proot/archive/refs/heads/system-$ARCH.zip
 	fi
 	mkdir -p "$TERMUX_ANDROID_BASE" && cd "$TERMUX_ANDROID_BASE" || exit 1
 	echo -n "[2/6] Extracting Android base system.... "
-	if ! tar -xzf "${TMPDIR:-/tmp}"/.android-base.tar.gz ; then
+	if ! unzip -q "${TMPDIR:-/tmp}"/.android-base.zip ; then
 		echo "Failed to extract Base system"
 		rm -rf "$TERMUX_ANDROID_BASE"
-		rm "${TMPDIR:-/tmp}"/.android-base.tar.gz
+		rm "${TMPDIR:-/tmp}"/.android-base.zip
 		exit 6
 	fi
 	mv termux-proot-system-$ARCH/* . && rm -rf termux-proot-system-$ARCH
