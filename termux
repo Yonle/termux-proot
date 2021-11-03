@@ -21,7 +21,7 @@ done
 
 # Installation
 
-if [ ! -d "$TERMUX_ANDROID_BASE" ]; then
+if [ ! -d "$TERMUX_ANDROID_BASE" ] || [ -z "$(ls -A $TERMUX_ANDROID_BASE)"; then
 	# Figure the system architecture
 	case $(uname -m) in
 		x86_64|x86|i686)  ARCH=x86 ;;
