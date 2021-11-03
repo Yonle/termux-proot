@@ -36,7 +36,7 @@ if [ ! -d "$TERMUX_ANDROID_BASE" ] || [ -z "$(ls -A $TERMUX_ANDROID_BASE)"; then
 	echo -n "[2/6] Extracting Android base system.... "
 	if ! tar -xzf "${TMPDIR:-/tmp}"/.android-base.tar.gz ; then
 		echo "Failed to extract Base system"
-		rm -rf "${TMPDIR:-/tmp}"/.android-base.tar.gz
+		rm -rf "$TERMUX_ANDROID_BASE"
 		rm "${TMPDIR:-/tmp}"/.android-base.tar.gz
 		exit 6
 	fi
@@ -55,6 +55,7 @@ if [ ! -d "$TERMUX_SANDBOX_PATH" ] || [ -z "$(ls -A "$TERMUX_SANDBOX_PATH")" ]; 
 	if ! unzip -q "${TMPDIR:-/tmp}"/.termux-rootfs.zip; then
 		echo "Failed extracting bootstrap!"
 		proot -0 rm -rf "$TERMUX_SANDBOX_PATH"
+		rm "${TMPDIR:-/tmp}"/.termux-rootfs.zip
 		exit 6
 	fi
 	echo "Done"
