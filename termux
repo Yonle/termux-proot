@@ -21,7 +21,7 @@ done
 if [ "$(uname -o)" != "Android" ]; then
 	echo "Using nightly build for non-android support."
 	echo "The nightly script will stored at ${HOME:-/home}/termux-proot.sh."
-	echo -e "\nKeep in mind that this feature is still alpha. Most of function may still not work properly.\nSo please report it at:\n  https://github.com/Yonle/termux-proot/issues"
+	echo -e "\nKeep in mind that this feature is still alpha.\nMost of function may still not work properly.\nSo please report it at:\n  https://github.com/Yonle/termux-proot/issues"
 	curl -sLo ${HOME:-/home}/termux-proot.sh https://raw.githubusercontent.com/Yonle/termux-proot/nightly/termux || exit 1
 	chmod +x ${HOME:-/home}/termux-proot.sh
 	exec ${HOME:-/home}/termux-proot.sh "$@"
