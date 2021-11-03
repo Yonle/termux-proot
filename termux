@@ -4,10 +4,10 @@
 # https://git.io/termux-proot
 
 # Dependency check
-DEPS=("curl" "unzip" "gzip" "proot")
+DEPS=("curl" "unzip" "proot")
 for DEP in "${DEPS[@]}"; do
 	if ! hash "$DEP" 2>/dev/null; then
-		echo "$DEP is not installed. Please install it and try again." && exit 6
+		echo "$DEP is not installed. Aborting."
 	fi
 done
 
@@ -17,7 +17,7 @@ done
 
 [ -z "$TERMUX_SANDBOX_APPPATH" ] && export TERMUX_SANDBOX_APPPATH=/data/data/com.termux
 
-[ "$(id -u)" = "0" ] && exec echo -e "You shouldn't execute this script as root, don't you?\nSo you're trying to harm your own Device.\n\nAbility to use termux-proot with root (even fake) is disabled permanently.\nJust do it in your real termux, Or use chroot. But don't blame me for broken device OK?"
+[ "$(id -u)" = "0" ] && exec echo -e "You shouldn't execute this script as root, don't you?\nSo you're trying to harm your own Device.\n\nAbility to use termux-proot with root (even fake) is disabled permanently.\nJust do it in your real termux, Or use chroot. But don't blame me for broken device OK?\n\nIf you mean to simulate fake root, add `-0` in TERMUX_SANDBOX_ENV variable."
 
 # Installation
 
