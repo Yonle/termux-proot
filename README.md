@@ -47,6 +47,15 @@ termux-proot also has it's own environment variables and it's changeable. They a
  * `TERMUX_SANDBOX_PROOT_OPTIONS` - A variable that used to add some proot arguments. Can used like `TERMUX_SANDBOX_PROOT_OPTIONS="-b /sdcard" ./termux-proot.sh`
  * `TERMUX_ANDROID_BASE` - Path to Android base system. Default is `$HOME/.android-base`
 
+## Advantages
+ * Sandboxed /system
+ * More secured
+
+## Disadvantages
+ * DNS is static. Should using static resolver that located at `/etc/hosts` or `/system/etc/hosts`. You may need to `echo unresolved-domain.com >> /system/etc/static-dns-hosts.txt` and run `/system/bin/update-static-dns` to get your `unresolved-domain.com` work.
+ * Some certain thing is not available (like OpenSLES, dalvikvm, and etc).
+ * ARM variant may require a custom seccomp profile to remove restrictions from personality() system call. Whereas Docker Hub contains prebuilt ARM image, it is outdated and won't receive updates anymore.
+
 ## Community
 - [Telegram group](https://t.me/yonlecoder)
 - [Discord Server](https://discord.gg/yqB5HF8XFu)
