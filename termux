@@ -4,37 +4,54 @@
 # https://git.io/termux-proot
 
 # Dependency check
-DEPS=("curl" "unzip" "proot")
+DEPS=("curl" "unzip" "gzip" "proot")
 for DEP in "${DEPS[@]}"; do
 	if ! hash "$DEP" 2>/dev/null; then
-		pkg install "$DEP" -y
+		echo "$DEP is not installed. Please install it and try again." && exit 6
 	fi
 done
 
-[ -z "$TERMUX_SANDBOX_PATH" ] && export TERMUX_SANDBOX_PATH="$PREFIX"/../../sandbox
+[ -z "$TERMUX_SANDBOX_PATH" ] && export TERMUX_SANDBOX_PATH=${HOME:-/home}/.termux-fs
+
+[ -z "$TERMUX_ANDROID_BASE" ] && export TERMUX_ANDROID_BASE=${HOME:-/home}/.android-base
 
 [ -z "$TERMUX_SANDBOX_APPPATH" ] && export TERMUX_SANDBOX_APPPATH=/data/data/com.termux
 
 [ "$(id -u)" = "0" ] && exec echo -e "You shouldn't execute this script as root, don't you?\nSo you're trying to harm your own Device.\n\nAbility to use termux-proot with root (even fake) is disabled permanently.\nJust do it in your real termux, Or use chroot. But don't blame me for broken device OK?"
 
-# { Installation }
-if [ "$(uname -o)" != "Android" ]; then
-	echo "Using nightly build for non-android support."
-	echo "The nightly script will stored at ${HOME:-/home}/termux-proot.sh."
-	echo -e "\nKeep in mind that this feature is still alpha.\nMost of function may still not work properly.\nSo please report it at:\n  https://github.com/Yonle/termux-proot/issues"
-	curl -sLo ${HOME:-/home}/termux-proot.sh https://raw.githubusercontent.com/Yonle/termux-proot/nightly/termux || exit 1
-	chmod +x ${HOME:-/home}/termux-proot.sh
-	exec ${HOME:-/home}/termux-proot.sh "$@"
+# Installation
+
+if [ ! -d "$TERMUX_ANDROID_BASE" ]; then
+	# Figure the system architecture
+	case $(uname -m) in
+		x86_64|x86|i686)  ARCH=x86 ;;
+		arm|aarch64|armv7l|armv8l)  ARCH=arm ;;
+		*)  exec echo "Unsupported Architecture: $(uname -m)" ;;
+	esac
+	if [ ! -f "${TMPDIR:-/tmp}"/.android-base.tar.gz ]; then
+		echo "[1/5] Downloading Android base system...."
+		curl -Lo "${TMPDIR:-/tmp}"/.android-base.tar.gz https://github.com/Yonle/termux-proot/archive/refs/tags/system-$ARCH.tar.gz
+	fi
+	mkdir -p "$TERMUX_ANDROID_BASE" && cd "$TERMUX_ANDROID_BASE" || exit 1
+	echo -n "[2/5] Extracting Android base system.... "
+	if ! tar -xzf "${TMPDIR:-/tmp}"/.android-base.tar.gz ; then
+		echo "Failed to extract Base system"
+		rm -rf "${TMPDIR:-/tmp}"/.android-base.tar.gz
+		rm "${TMPDIR:-/tmp}"/.android-base.tar.gz
+		exit 6
+	fi
+	mv termux-proot-system-$ARCH/* . && rm -rf termux-proot-system-$ARCH
+	echo "Done"
 fi
 
 if [ ! -d "$TERMUX_SANDBOX_PATH" ] || [ -z "$(ls -A "$TERMUX_SANDBOX_PATH")" ]; then
 	if [ ! -f "${TMPDIR:-/tmp}"/.termux-rootfs.zip ]; then
-		echo "[#  ] Downloading Latest Termux Bootstrap...."
-		curl -Lo "${TMPDIR:-/tmp}"/.termux-rootfs.zip https://github.com/termux/termux-packages/releases/download/"$(curl -s "https://api.github.com/repos/termux/termux-packages/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')"/bootstrap-"$(dpkg --print-architecture)".zip
+		echo "[3/5] Downloading Latest Termux Bootstrap...."
+		curl -Lo "${TMPDIR:-/tmp}"/.termux-rootfs.zip https://github.com/termux/termux-packages/releases/download/"$(curl -s "https://api.github.com/repos/termux/termux-packages/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')"/bootstrap-"$(uname -m)".zip
 	fi
 	mkdir "$TERMUX_SANDBOX_PATH" && cd "$TERMUX_SANDBOX_PATH" || exit 1
 
-	echo -n "[## ] Extracting.... "
+	echo -n "[4/5] Extracting.... "
 	if ! unzip -q "${TMPDIR:-/tmp}"/.termux-rootfs.zip; then
 		echo "Failed extracting bootstrap!"
 		proot -0 rm -rf "$TERMUX_SANDBOX_PATH"
@@ -45,7 +62,7 @@ fi
 
 if [ -f "$TERMUX_SANDBOX_PATH/SYMLINKS.txt" ]; then
 	cd $TERMUX_SANDBOX_PATH
-	echo -n "[###] Symlinking.... "
+	echo -n "[5/5] Symlinking.... "
 	while read -r p; do
 		IFS="←" read -r FILE DEST <<< "$p"
 		proot -0 ln -s "$FILE" "$DEST"
@@ -54,49 +71,48 @@ if [ -f "$TERMUX_SANDBOX_PATH/SYMLINKS.txt" ]; then
 fi
 
 ARGS=("proot")
-ARGS+=("--kill-on-exit -r $TERMUX_SANDBOX_PATH $TERMUX_SANDBOX_PROOT_OPTIONS")
+ARGS+=("-r $TERMUX_ANDROID_BASE $TERMUX_SANDBOX_PROOT_OPTIONS")
 ARGS+=("-w $TERMUX_SANDBOX_APPPATH/files/home")
 
 # Make sure that some common directory like /home is there.
 # Otherwise, we recreate the directory
-for dir in $TERMUX_SANDBOX_PATH/var/cache $TERMUX_SANDBOX_PATH/home $TERMUX_SANDBOX_PATH/sdcard; do
+for dir in $TERMUX_SANDBOX_PATH/var/cache $TERMUX_SANDBOX_PATH/home $TERMUX_ANDROID_BASE/sdcard; do
 	! [ -d "$dir" ] && mkdir -p "$dir"
 done
 
 # Bind some common path
-for bind in /dev /proc /sys /system /vendor /apex /linkerconfig/ld.config.txt /property_context $TERMUX_SANDBOX_PATH:$TERMUX_SANDBOX_APPPATH/files/usr $TERMUX_SANDBOX_PATH/var/cache:$TERMUX_SANDBOX_APPPATH/cache $TERMUX_SANDBOX_PATH/home:$TERMUX_SANDBOX_APPPATH/files/home; do
-	[ -d "$bind" ] || [ -f "$bind" ] || grep -q $TERMUX_SANDBOX_APPPATH <<< "$bind" && ARGS+=("-b $bind")
+for bind in /dev /proc /sys $TERMUX_ANDROID_BASE:/system $TERMUX_ANDROID_BASE:/vendor /apex /linkerconfig/ld.config.txt /property_context $TERMUX_SANDBOX_PATH:$TERMUX_SANDBOX_APPPATH/files/usr $TERMUX_SANDBOX_PATH/var/cache:$TERMUX_SANDBOX_APPPATH/cache $TERMUX_SANDBOX_PATH/home:$TERMUX_SANDBOX_APPPATH/files/home; do
+	[ -d "$bind" ] || [ -f "$bind" ] || grep -q $TERMUX_SANDBOX_APPPATH <<< "$bind" || grep -q $TERMUX_ANDROID_BASE <<< "$bind" && ARGS+=("-b $bind")
 done
 
-if [ -x $TERMUX_SANDBOX_APPPATH/bin/env ]; then
-	ARGS+=("$TERMUX_SANDBOX_APPPATH/files/usr/bin/env -i")
-	ARGS+=("HOME=$TERMUX_SANDBOX_APPPATH/files/home")
-	ARGS+=("PATH=$TERMUX_SANDBOX_APPPATH/files/usr/bin")
-	ARGS+=("TERM=${TERM:-xterm-256color}")
-	ARGS+=("COLORTERM=${COLORTERM:-truecolor}")
-	ARGS+=("ANDROID_DATA=/data")
-	ARGS+=("ANDROID_ROOT=/system")
-	ARGS+=("EXTERNAL_STORAGE=/sdcard")
-	ARGS+=("LANG=${LANG:-en_US.UTF-8}")
-	ARGS+=("LD_LIBRARY_PATH=$TERMUX_SANDBOX_APPPATH/files/usr/lib")
-	[ -x "$TERMUX_SANDBOX_APPPATH/files"/usr/lib/libtermux-exec.so ] && ARGS+=("LD_PRELOAD=$TERMUX_SANDBOX_APPPATH/files/usr/lib/libtermux-exec.so")
-	ARGS+=("TERMUX_VERSION=${TERMUX_VERSION:-0.118}")
-	ARGS+=("PREFIX=$TERMUX_SANDBOX_APPPATH/files/usr")
-	ARGS+=("TMPDIR=$TERMUX_SANDBOX_APPPATH/files/usr/tmp")
-	ARGS+=("$TERMUX_SANDBOX_ENV")
-fi
+ARGS+=("$TERMUX_SANDBOX_APPPATH/files/usr/bin/env -i")
+ARGS+=("HOME=$TERMUX_SANDBOX_APPPATH/files/home")
+ARGS+=("PATH=$TERMUX_SANDBOX_APPPATH/files/usr/bin")
+ARGS+=("TERM=${TERM:-xterm-256color}")
+ARGS+=("COLORTERM=${COLORTERM:-truecolor}")
+ARGS+=("ANDROID_DATA=/data")
+ARGS+=("ANDROID_ROOT=/system")
+ARGS+=("EXTERNAL_STORAGE=/sdcard")
+ARGS+=("LANG=${LANG:-en_US.UTF-8}")
+ARGS+=("LD_LIBRARY_PATH=$TERMUX_SANDBOX_APPPATH/files/usr/lib")
+[ -x "$TERMUX_SANDBOX_APPPATH/files"/usr/lib/libtermux-exec.so ] && ARGS+=("LD_PRELOAD=$TERMUX_SANDBOX_APPPATH/files/usr/lib/libtermux-exec.so")
+ARGS+=("TERMUX_VERSION=${TERMUX_VERSION:-0.118}")
+ARGS+=("PREFIX=$TERMUX_SANDBOX_APPPATH/files/usr")
+ARGS+=("TMPDIR=$TERMUX_SANDBOX_APPPATH/files/usr/tmp")
+ARGS+=("$TERMUX_SANDBOX_ENV")
 
 cmd="$*"
 
 # Unset Preload Library.
 unset LD_PRELOAD
 
+${ARGS[@]} /system/bin/update-static-dns
 # shellcheck disable=SC2068
 case "$cmd" in
 "")
-	exec ${ARGS[@]} /bin/login
+	exec ${ARGS[@]} login
 	;;
 *)
-	exec ${ARGS[@]} /bin/login -c "$cmd"
+	exec ${ARGS[@]} login -c "$cmd"
 	;;
 esac
