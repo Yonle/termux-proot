@@ -29,12 +29,12 @@ fi
 
 if [ ! -d "$TERMUX_SANDBOX_PATH" ] || [ -z "$(ls -A "$TERMUX_SANDBOX_PATH")" ]; then
 	if [ ! -f "${TMPDIR:-/tmp}"/.termux-rootfs.zip ]; then
-		echo "[#  ] Downloading Latest Termux Bootstrap...."
-		curl -Lo "${TMPDIR:-/tmp}"/.termux-rootfs.zip https://github.com/termux/termux-packages/releases/download/"$(curl -s "https://api.github.com/repos/termux/termux-packages/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')"/bootstrap-"$(dpkg --print-architecture)".zip
+		echo "[1/3] Downloading Latest Termux Bootstrap...."
+		curl -Lo "${TMPDIR:-/tmp}"/.termux-rootfs.zip https://github.com/termux/termux-packages/releases/download/"$(curl -s "https://api.github.com/repos/termux/termux-packages/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')"/bootstrap-"$(uname -m)".zip
 	fi
 	mkdir "$TERMUX_SANDBOX_PATH" && cd "$TERMUX_SANDBOX_PATH" || exit 1
 
-	echo -n "[## ] Extracting.... "
+	echo -n "[2/3] Extracting.... "
 	if ! unzip -q "${TMPDIR:-/tmp}"/.termux-rootfs.zip; then
 		echo "Failed extracting bootstrap!"
 		proot -0 rm -rf "$TERMUX_SANDBOX_PATH"
@@ -45,7 +45,7 @@ fi
 
 if [ -f "$TERMUX_SANDBOX_PATH/SYMLINKS.txt" ]; then
 	cd $TERMUX_SANDBOX_PATH
-	echo -n "[###] Symlinking.... "
+	echo -n "[3/3] Symlinking.... "
 	while read -r p; do
 		IFS="←" read -r FILE DEST <<< "$p"
 		proot -0 ln -s "$FILE" "$DEST"
