@@ -28,30 +28,43 @@ if [ ! -d "$TERMUX_ANDROID_BASE" ] || [ -z "$(ls -A $TERMUX_ANDROID_BASE)" ]; th
 		arm|aarch64|armv7l|armv8l)  ARCH=arm ;;
 		*)  exec echo "Unsupported Architecture: $(uname -m)" ;;
 	esac
-	if [ ! -f "${TMPDIR:-/tmp}"/.android-base.zip ]; then
-		echo "[1/6] Downloading Android base system...." 
-		curl -Lo "${TMPDIR:-/tmp}"/.android-base.zip https://github.com/Yonle/termux-proot/archive/refs/heads/system-$ARCH.zip
+	if [ ! -d "${TMPDIR:-/tmp}"/.termux-docker ]; then
+		echo -n "[1/5] Downloading Android base system...."
+		if ! git clone --depth=1 -q https://github.com/termux/termux-docker "${TMPDIR:-/tmp}"/.termux-docker; then
+			echo "Fail"
+			exit 6
+		fi
+
+		curl -sLo "${TMPDIR:-/tmp}"/.termux-docker/system/$ARCH/etc/static-dns-hosts.txt https://raw.githubusercontent.com/termux/termux-docker/master/static-dns-hosts.txt
+
+		echo "Done"
 	fi
-	mkdir -p "$TERMUX_ANDROID_BASE" && cd "$TERMUX_ANDROID_BASE" || exit 1
-	echo -n "[2/6] Extracting Android base system.... "
-	if ! unzip -q "${TMPDIR:-/tmp}"/.android-base.zip ; then
-		echo "Failed to extract Base system"
-		rm -rf "$TERMUX_ANDROID_BASE"
-		rm "${TMPDIR:-/tmp}"/.android-base.zip
-		exit 6
-	fi
-	mv termux-proot-system-$ARCH/* . && rm -rf termux-proot-system-$ARCH
+
+	echo -n "[2/5] Preparing Android base system.... "
+
+	current_dir=$(pwd)
+	cd "${TMPDIR:-/tmp}"/.termux-docker/system/$ARCH/bin
+
+	for i in "[" "[[" ar arch arp arping ascii ash awk base32 base64 basename bbconfig bc blkdiscard blkid blockdev brctl bunzip2 bzcat bzip2 cal cat chattr chgrp chmod chown chpst chroot chrt cksum clear cmp comm cp cpio crc32 crond crontab cut date dc dd diff dirname dmesg dnsdomainname dos2unix du echo ed egrep env envdir expand expr factor fallocate false fdisk fgrep find findfs flock fold free fstrim fsync ftpd ftpget ftpput fuser getopt grep groups gunzip gzip hd head hexdump hexedit hostname httpd hwclock id ifconfig inotifyd install ionice iostat ip ipaddr ipcalc iplink ipneigh iproute iprule iptunnel kill killall killall5 less link linux32 linux64 ln losetup ls lsattr lsof lspci lsscsi lsusb lzcat lzma lzop lzopcat makemime md5sum mkdir mkdosfs mke2fs mkfifo mkfs.ext2 mkfs.vfat mknod mkswap mktemp more mount mountpoint mpstat mv nc netcat netstat nice nl nmeter nohup nproc nsenter od paste patch pgrep pidof ping pipe_progress pivot_root pkill pmap popmaildir printenv printf ps pscan pstree pwd pwdx rdate readlink realpath reformime renice reset resize rev rfkill rm rmdir route run-parts runsv runsvdir rx script scriptreplay sed sendmail seq setarch setsid setuidgid sha1sum sha256sum sha3sum sha512sum shred shuf sleep smemcap softlimit sort split start-stop-daemon stat strings stty sum sv svlogd switch_root sync sysctl tac tail tar tc tcpsvd tee telnet telnetd test tftp tftpd time timeout top touch tr traceroute true truncate tty ttysize tunctl tune2fs udpsvd umount uname uncompress unexpand uniq unix2dos unlink unlzma unlzop unshare unxz unzip uptime usleep uudecode uuencode vconfig vi watch wc wget which whoami whois xargs xxd xz xzcat yes zcat; do
+		ln -s busybox $i
+	done
+
+	rm -rf "$TERMUX_ANDROID_BASE"
+	mv "${TMPDIR:-/tmp}"/.termux-docker/system/$ARCH ${HOME:-~}/.android-base
+	cd "$current_dir"
+	rm -rf "${TMPDIR:-/tmp}"/.termux-docker/
+
 	echo "Done"
 fi
 
 if [ ! -d "$TERMUX_SANDBOX_PATH" ] || [ -z "$(ls -A "$TERMUX_SANDBOX_PATH")" ]; then
 	if [ ! -f "${TMPDIR:-/tmp}"/.termux-rootfs.zip ]; then
-		echo "[3/6] Downloading Latest Termux Bootstrap...."
+		echo "[3/5] Downloading Latest Termux Bootstrap...."
 		curl -Lo "${TMPDIR:-/tmp}"/.termux-rootfs.zip https://github.com/termux/termux-packages/releases/download/"$(curl -s "https://api.github.com/repos/termux/termux-packages/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')"/bootstrap-"$(uname -m)".zip
 	fi
 	mkdir "$TERMUX_SANDBOX_PATH" && cd "$TERMUX_SANDBOX_PATH" || exit 1
 
-	echo -n "[4/6] Extracting.... "
+	echo -n "[4/5] Extracting.... "
 	if ! unzip -q "${TMPDIR:-/tmp}"/.termux-rootfs.zip; then
 		echo "Failed extracting bootstrap!"
 		proot -0 rm -rf "$TERMUX_SANDBOX_PATH"
@@ -63,7 +76,7 @@ fi
 
 if [ -f "$TERMUX_SANDBOX_PATH/SYMLINKS.txt" ]; then
 	cd $TERMUX_SANDBOX_PATH
-	echo -n "[5/6] Symlinking.... "
+	echo -n "[5/5] Symlinking.... "
 	while read -r p; do
 		IFS="←" read -r FILE DEST <<< "$p"
 		! [ -h "$DEST" ] && proot -0 ln -s "$FILE" "$DEST"
@@ -107,7 +120,6 @@ cmd="$*"
 # Unset Preload Library.
 unset LD_PRELOAD
 
-echo "[6/6] Updating Static hosts...."
 ${ARGS[@]} /system/bin/update-static-dns
 # shellcheck disable=SC2068
 case "$cmd" in
