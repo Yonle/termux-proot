@@ -9,6 +9,7 @@ Also support on non-Android distro, Including Debian, Alpine, and etc.
 
 ## Setup & Installation
 Before installing, We need these 3 packages to be installed in your Termux:
+ * `git` to fetching Android base from [termux-docker](https://github.com/termux/termux-docker).
  * `curl` for fetching & downloading latest termux bootstrap.
  * `unzip` for unzipping Termux Bootstrap.
  * `proot` for start sandboxed environment.
