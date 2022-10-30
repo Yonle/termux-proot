@@ -1,3 +1,18 @@
+# For Android users
+For emulating termux inside termux, Use the first version of termux-proot.
+
+(Execute this outside termux-proot environment)
+```sh
+# Download the file of 1st version of termux-proot
+curl -sLo ~/termux-proot.sh https://github.com/Yonle/termux-proot/raw/v1.0.0/termux
+
+# Change permission
+chmod ~/termux-proot.sh
+
+# Start sandbox
+~/termux-proot.sh
+```
+
 ![Running a sandboxed Termux environment](https://raw.githubusercontent.com/Yonle/termux-proot/master/screenshot.png)
 
 # termux-proot
