@@ -7,7 +7,7 @@ For emulating termux inside termux, Use the first version of termux-proot.
 curl -sLo ~/termux-proot.sh https://github.com/Yonle/termux-proot/raw/v1.0.0/termux
 
 # Change permission
-chmod ~/termux-proot.sh
+chmod +x ~/termux-proot.sh
 
 # Start sandbox
 ~/termux-proot.sh
