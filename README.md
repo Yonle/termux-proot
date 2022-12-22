@@ -1,5 +1,5 @@
-# For Android users
-For emulating termux inside termux, Use the first version of termux-proot.
+# To Android users
+To emulate termux inside termux, Use the first version of termux-proot.
 
 (Execute this outside termux-proot environment)
 ```sh
